@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 
-// const pool = new Pool();
+//const pool = new Pool();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -8,4 +8,5 @@ const pool = new Pool({
     rejectUnauthorized: false
   }
 });
+
 module.exports = pool;
