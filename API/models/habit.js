@@ -1,5 +1,6 @@
 const db = require('../dbConfig');
-
+require('dotenv').config();
+const sgMail = require('@sendgrid/mail');
 module.exports = class Habit{
     constructor(data){
         this.id = data.id;
@@ -157,21 +158,29 @@ module.exports = class Habit{
         })
     };
 
-    static streakCheck(){
-        return new Promise(async(resolve, reject) => {
-            try {
-                const result = await db.query('SELECT id, frequency_day, times_completed FROM Habits;');
-                result.rows.forEach(async r => {
-                    const timeCompleteUpdate = await db.query('UPDATE habits SET times_completed = 0 WHERE id = $1;', [r.id]);
-                    if (r.frequency_day !== r.times_completed){
-                        const update = await db.query('UPDATE habits SET streak = 0 WHERE id = $1;', [r.id]);
-                    };
-                });
-                resolve('Successfully set/reset streak');
-            } catch (err) {
-                reject('Cannot find streak');
-            }
+    static sendEmail(data){
+        const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY.toString();
+        sgMail.setApiKey(SENDGRID_API_KEY);
+        const today = new Date();
+        const day = today.getDate();
+        const month = today.getMonth();
+        const year = today.getFullYear();
+        let date =  new Date(year, month, day, data.timeHour, data.timeMin);
+        let unixDate = date.getTime() / 1000;
+        console.log(data);
+        const msg = {
+            to: `${data.email}`,
+            from: 'stridereminderapp@gmail.com',
+            subject: `Reminder to ${data.habitname}`,
+            text: `Make sure you complete ${data.habitname} today!`,
+            html: `<p>Make sure you complete ${data.habitname} today!</p>`,
+            sendAt: unixDate
+        }
+        sgMail.send(msg).then(() => {
+            console.log('Email Request Sent');
+        }).catch((err) => {
+            console.error(err);
         })
-    };
+    }
 
 };
