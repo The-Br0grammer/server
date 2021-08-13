@@ -1,3 +1,5 @@
+- You can check out the client repo [here](https://github.com/The-Br0grammer/client).
+
 # Installation and Usage
 
 ## Installation
